@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.work.mapper.RoleMapper">
+    <insert id="addRole" parameterType="com.work.entity.Role">
+      insert into tbl_role(role_name) values(#{roleName})
+    </insert>
+
+    <update id="updateRole" parameterType="com.work.entity.Role">
+      update tbl_role
+      set role_name=#{roleName}
+      where role_id=#{roleId}
+    </update>
+
+    <delete id="delRole" parameterType="com.work.entity.Role">
+      delete from tbl_role where role_id=#{roleId}
+    </delete>
+
+    <select id="queryRoleInfo" parameterType="com.work.entity.Role" resultType="com.work.entity.Role">
+       select role_id,role_name from tbl_role
+    </select>
+
+    <select id="exists" parameterType="com.work.entity.Role" resultType="int">
+        select count(1) from tbl_role where role_name=#{roleName}
+    </select>
+
+
+    <!--<insert id="createTable" parameterType="com.work.entity.Tables">
+        create table ${tableName}
+        (
+        id int AUTO_INCREMENT primary key,
+        <foreach collection="list"  separator="," item="item">
+            ${item.fieldName}    ${ item.dataType}
+        </foreach>
+        )
+    </insert>-->
+
+    <insert id="newTableRecord">
+      insert into tbl_table_record(str,status,type)values(#{str},1,1)
+    </insert>
+
+    <update id="updateTableRecord" parameterType="com.work.entity.CreateTableRecord">
+      update tbl_table_record
+        <set>
+            <if test="#{status}!=null and #{status}>0">
+                status=#{status}
+            </if>
+            <if test="#{str}!=null and #{str}!=''">
+                str=#{str}
+            </if>
+        </set>
+      where id=#{id}
+    </update>
+
+    <select id="existsTable" resultType="int">
+        select count(1) from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=#{database} and TABLE_NAME=#{tableName}
+    </select>
+
+    <select id="queryTableRecord" resultType="string">
+        select str from tbl_table_record where id=#{id}
+    </select>
+
+    <select id="isNewData" resultType="int">
+      select type from tbl_table_record where id=#{id}
+    </select>
+
+  <!--  <select id="">
+         select ifnull(max(column_name),0)count from information_schema.columns where table_name='tbl_role' and table_schema="test2" and column_name='role'
+    </select>-->
+
+    <update id="synTableAndField" parameterType="com.work.entity.Tables">
+        <if test="#{isSyn}==1">
+          <foreach collection="list" item="item">
+            call pro_existField(#{tableName},#{item.fieldName},#{dataType})
+          </foreach>
+        </if>
+
+        <if test="#{isSyn}==2">
+            drop table ${tableName}
+            create table ${tableName}
+            (
+            <foreach collection="list" separator="," item="item">
+                ${item.fieldName}  ${ item.dataType}
+            </foreach>
+            )
+        </if>
+    </update>
+</mapper>
